@@ -1,16 +1,49 @@
 @board = Array.new(9).map do |i|
-  i = Array.new(9)
+  i = Array.new(9).map do |j|
+    j = 0
+  end
 end
 @opt = Array.new(9).map do |i|
   i = Array.new(9).map do |j|
     j = Array.new([1,2,3,4,5,6,7,8,9])
   end
 end
-9.times do |i|
-  9.times do |j|
-    @board[i][j] = 0
-  end
-end
+
+# @board = [
+#   [],
+#   [],
+#   [],
+#   [],
+#   [],
+#   [],
+#   [],
+#   [],
+#   []
+# ]
+
+# @board = [              #スパコンで作成された問題 少し時間がかかる
+#   [0,6,1,0,0,7,0,0,3],
+#   [0,9,2,0,0,3,0,0,0],
+#   [0,0,0,0,0,0,0,0,0],
+#   [0,0,8,5,3,0,0,0,0],
+#   [0,0,0,0,0,0,5,0,4],
+#   [5,0,0,0,0,8,0,0,0],
+#   [0,4,0,0,0,0,0,0,1],
+#   [0,0,0,1,6,0,8,0,0],
+#   [6,0,0,0,0,0,0,0,0]
+# ]
+
+# @board = [              #世界一難しい問題
+#   [8,0,0,0,0,0,0,0,0],
+#   [0,0,3,6,0,0,0,0,0],
+#   [0,7,0,0,9,0,2,0,0],
+#   [0,5,0,0,0,7,0,0,0],
+#   [0,0,0,0,4,5,7,0,0],
+#   [0,0,0,1,0,0,0,3,0],
+#   [0,0,1,0,0,0,0,6,8],
+#   [0,0,8,5,0,0,0,1,0],
+#   [0,9,0,0,0,0,4,0,0],
+# ]
 
 def output
   print("   a b c d e f g h i\n")
@@ -29,48 +62,26 @@ def output
   end
 end
 
-def outputomit(x,y,num)
-  x += 9 if x < 0
-  y += 9 if y < 0
-  puts("delete #{num} at x= #{x} y= #{y}")
-  # 9.times do |i|
-  #   p @opt[i]
-  # end
-  # print("\n")
-end
-
 def answer(x,y,num)
-  puts("answer #{num} at x= #{x} y= #{y}")
+  x += 9 if x < 0
+  chars = "abcdefghi"
+  y += 9 if y < 0
+  puts("FILL #{num} AT #{chars[x]}#{y+1}")
   @board[y][x] = num
   omitopt(x,y,num)
-  return if @jug
 end
 
 def omitopt(x,y,num)
-  x += 9 if x < 0
-  y += 9 if y < 0
+  # x += 9 if x < 0
+  # y += 9 if y < 0
   @opt[y][x] = []
-  outputomit(x,y,num)
-  1.upto(9) do |i|
-    outputomit(x,y-i,num) if @opt[y-i][x].delete(num)
-      
-    #   if @cont && @opt[y-i][x].length == 0
-    #     @jug = true
-    #     return
-    #   end
-    # end
 
-    answer(x,y-i,@opt[y-i][x][0]) if @opt[y-i][x].length == 1
+  1.upto(9) do |i| #y軸に対しての操作
+    @opt[y-i][x].delete(num)
   end
-  1.upto(9) do |i|
-    outputomit(x,y-i,num) if @opt[y][x-i].delete(num)
-      
-    #   if @cont && @opt[y][x-i].length == 0
-    #     @jug = true
-    #     return
-    #   end
-    # end
-    answer(x-i,y,@opt[y][x-i][0]) if @opt[y][x-i].length == 1
+
+  1.upto(9) do |i| #x軸に対しての操作
+    @opt[y][x-i].delete(num)
   end
   
   if x < 3
@@ -91,60 +102,122 @@ def omitopt(x,y,num)
   sy.upto(sy+2) do |i|
     sx.upto(sx+2) do |j|
       next if i == y && j == x
-      outputomit(j,i,num) if @opt[i][j].delete(num)
+      @opt[i][j].delete(num)
+    end
+  end
+
+  9.times do |i|
+    9.times do |j|
       answer(j,i,@opt[i][j][0]) if @opt[i][j].length == 1
     end
   end
   
 end
 
-# def contradiction
-  
-#   dataSave
-#   9.times do |i|
-#     9.times do |j|
-#       if @board[i][j].length > 0
-#         if @jug
-          
-#         end
-#         answer(j,i,@board[i][j].first)
-#       end
-#     end
-#   end
-# end
+def deleteFirstSel #直近の候補一つを削除する
+  dataLoad  #直近の状態(answerする前)に戻っている。
+  dataDelete
+  9.times do |i|
+    9.times do |j|
+      if @opt[i][j].length > 1
+        @opt[i][j].delete(@opt[i][j][0])
+        @break = true
+        return
+      
+      elsif @opt[i][j].length == 1
+        deleteFirstSel #直近の候補が1つの場合はもうひとつ前。
+      end
+      return if @break
+    end
+  end
+end
 
-# def dataSave #背理法
-#   ary = [
-#     Marshal.load(Marshal.dump(@board)),
-#     Marshal.load(Marshal.dump(@opt))
-#   ]
-#   @data.push(ary)
-# end
-# def detaDelete
-#   @data.pop
-#   @board = @data.last[0]
-#   @opt = @data.last[1]
-# end
+def contradiction
+  i = 0
+  j = 0
+  jug = true
+  @flag = false
+  while i < 9 do
+    while j < 9 do
+      if @opt[i][j].length == 0 && @board[i][j] == 0
+        @break = false
+        deleteFirstSel
+        i = 0
+        j = 0
+        redo
+        
+      elsif @opt[i][j].length >= 1
+          dataSave
+        answer(j,i,@opt[i][j][0])
+        # print "\n"
+      end
+      j = j + 1
+    end
+    j = 0
+    i = i + 1
+
+  end #9.times
+
+end #def
+
+def dataSave
+  ary = [
+    Marshal.load(Marshal.dump(@board)),
+    Marshal.load(Marshal.dump(@opt))
+  ]
+  @data.push(ary)
+  puts("DATA SAVE")
+end
+def dataDelete
+  @data.delete(@data.last) if @data.length > 0
+  puts("DATA DELETE")
+  return
+end
+def dataLoad
+  @board = Marshal.load(Marshal.dump(@data.last[0]))
+  @opt = Marshal.load(Marshal.dump(@data.last[1]))
+  puts("DATA LOAD")
+end
 
 #main
-# @cont = false
+
+@data = Array.new
+@contflag = false
+@jug = true
+@undo = false
+# dataSave
 output
+dataSave
 loop do
   print("\n")
   l = gets.split(" ")
   print("\n")
   break if l[0] == "exit"
-  if l[1] == "nil"
-      num = nil
+  if l[0] == "undo"
+    dataDelete
+    dataLoad
   else
-      num = l[1].to_i
+    num = l[1].to_i
+    x = /#{l[0][0]}/ =~ "abcdefghi"
+    y = l[0][1].to_i - 1
+    @board[y][x] = num
+    puts("FILL #{num} AT #{l[0]}")
+    dataSave
   end
-  x = /#{l[0][0]}/ =~ "abcdefghi"
-  y = l[0][1].to_i - 1
-  answer(x,y,num)
-  print("\n")
+
   output
 end
-# @cont = true
-# @data = Array.new
-# contradiction #背理法
+
+9.times do |i|
+  9.times do |j|
+    if @board[i][j] != 0
+      answer(j,i,@board[i][j])
+    end
+  end
+end
+
+dataSave
+contradiction #背理法
+print "\n"
+output
+print "\n"
