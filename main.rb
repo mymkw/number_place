@@ -33,17 +33,17 @@ end
 #   [6,0,0,0,0,0,0,0,0]
 # ]
 
-# @board = [              #世界一難しい問題
-#   [8,0,0,0,0,0,0,0,0],
-#   [0,0,3,6,0,0,0,0,0],
-#   [0,7,0,0,9,0,2,0,0],
-#   [0,5,0,0,0,7,0,0,0],
-#   [0,0,0,0,4,5,7,0,0],
-#   [0,0,0,1,0,0,0,3,0],
-#   [0,0,1,0,0,0,0,6,8],
-#   [0,0,8,5,0,0,0,1,0],
-#   [0,9,0,0,0,0,4,0,0],
-# ]
+@test = [              #世界一難しい問題
+  [8,0,0,0,0,0,0,0,0],
+  [0,0,3,6,0,0,0,0,0],
+  [0,7,0,0,9,0,2,0,0],
+  [0,5,0,0,0,7,0,0,0],
+  [0,0,0,0,4,5,7,0,0],
+  [0,0,0,1,0,0,0,3,0],
+  [0,0,1,0,0,0,0,6,8],
+  [0,0,8,5,0,0,0,1,0],
+  [0,9,0,0,0,0,4,0,0],
+]
 
 def output
   print("   a b c d e f g h i\n")
@@ -135,8 +135,6 @@ end
 def contradiction
   i = 0
   j = 0
-  jug = true
-  @flag = false
   while i < 9 do
     while j < 9 do
       if @opt[i][j].length == 0 && @board[i][j] == 0
@@ -147,9 +145,8 @@ def contradiction
         redo
         
       elsif @opt[i][j].length >= 1
-          dataSave
+        dataSave
         answer(j,i,@opt[i][j][0])
-        # print "\n"
       end
       j = j + 1
     end
@@ -179,23 +176,34 @@ def dataLoad
   puts("DATA LOAD")
 end
 
+def quick
+  9.times do |i|
+    l = gets
+    9.times do |j|
+      @board[i][j] = l[j].to_i
+    end
+    output
+  end
+end
+
 #main
 
 @data = Array.new
-@contflag = false
-@jug = true
-@undo = false
-# dataSave
-output
 dataSave
+output
 loop do
   print("\n")
-  l = gets.split(" ")
-  print("\n")
+  l =gets.split(" ")
   break if l[0] == "exit"
   if l[0] == "undo"
     dataDelete
     dataLoad
+  elsif l[0] == "test"
+    @board = Marshal.load(Marshal.dump(@test))
+    dataSave
+    output
+  elsif l[0] == "quick"
+    quick
   else
     num = l[1].to_i
     x = /#{l[0][0]}/ =~ "abcdefghi"
@@ -204,8 +212,6 @@ loop do
     puts("FILL #{num} AT #{l[0]}")
     dataSave
   end
-
-  output
 end
 
 9.times do |i|
@@ -215,7 +221,6 @@ end
     end
   end
 end
-
 dataSave
 contradiction #背理法
 print "\n"
