@@ -21,7 +21,7 @@ end
 #   []
 # ]
 
-# @board = [              #スパコンで作成された問題 少し時間がかかる
+# @test = [              #スパコンで作成された問題 少し時間がかかる 2m
 #   [0,6,1,0,0,7,0,0,3],
 #   [0,9,2,0,0,3,0,0,0],
 #   [0,0,0,0,0,0,0,0,0],
@@ -33,7 +33,7 @@ end
 #   [6,0,0,0,0,0,0,0,0]
 # ]
 
-@test = [              #世界一難しい問題
+@test = [              #世界一難しい問題 printメソッド込みで3s
   [8,0,0,0,0,0,0,0,0],
   [0,0,3,6,0,0,0,0,0],
   [0,7,0,0,9,0,2,0,0],
@@ -66,7 +66,7 @@ def answer(x,y,num)
   x += 9 if x < 0
   chars = "abcdefghi"
   y += 9 if y < 0
-  puts("FILL #{num} AT #{chars[x]}#{y+1}")
+  #puts("FILL #{num} AT #{chars[x]}#{y+1}")
   @board[y][x] = num
   omitopt(x,y,num)
 end
@@ -163,21 +163,24 @@ def dataSave
     Marshal.load(Marshal.dump(@opt))
   ]
   @data.push(ary)
-  puts("DATA SAVE")
+  #puts("DATA SAVE")
 end
 def dataDelete
   @data.delete(@data.last) if @data.length > 0
-  puts("DATA DELETE")
+  #puts("DATA DELETE")
   return
 end
 def dataLoad
   @board = Marshal.load(Marshal.dump(@data.last[0]))
   @opt = Marshal.load(Marshal.dump(@data.last[1]))
-  puts("DATA LOAD")
+  #puts("DATA LOAD")
 end
 
 def quick
+  print "\n"
+  puts "空白は0とする 入力例:000123000"
   9.times do |i|
+    print "#{i+1}行目=> "
     l = gets
     9.times do |j|
       @board[i][j] = l[j].to_i
@@ -191,8 +194,15 @@ end
 @data = Array.new
 dataSave
 output
+puts "座標+スペース+数字で入力(半角)"
+puts "exit:入力終了"
+puts "undo:ひとつ前に戻る"
+puts "test:テストデータ"
+puts "quick:1行ずつまとめて入力"
+
 loop do
   print("\n")
+  print "=> "
   l =gets.split(" ")
   break if l[0] == "exit"
   if l[0] == "undo"
@@ -211,6 +221,7 @@ loop do
     @board[y][x] = num
     puts("FILL #{num} AT #{l[0]}")
     dataSave
+    output
   end
 end
 
